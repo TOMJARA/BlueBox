@@ -1,1 +1,19 @@
+# BlueBox – Official .gitignore
+# Never upload personal logs or huge buffers!
 
+BlueBoxBuffer/
+*.zip
+*.log
+*.json
+*.png
+*.jpg
+*.tmp
+*.bak
+
+# Windows garbage
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
