@@ -1,3 +1,6 @@
+<p align="center">
+  <img src="bluebox-logo.png" width="600"/>
+</p>
 # BlueBox – The Black Box for Computers™
 
 **Invented and first released by Ghass on November 30, 2025**
