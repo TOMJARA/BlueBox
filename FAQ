@@ -1,0 +1,10 @@
+## FAQ
+
+**Q: When is the crash package created?**  
+A: Immediately after the next successful boot. Windows boots (detects Event 41 Kernel-Power). You will find the ZIP on the desktop within seconds of logging in.
+
+**Q: Does it work if the PC never boots again?**  
+A: In v0.1 the package is created on next boot. v0.2+ can write to USB/network automatically.
+
+**Q: Can it detect network problems on the switch/router?**  
+A: It captures everything the PC sees (adapter state, connection drops, DNS failures, etc.). Switch/router internal logs require SNMP — planned for future versions.
