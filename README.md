@@ -1,30 +1,32 @@
-<p align="center">
-  <img src="bluebox-logo.png" width="600"/>
-</p>
-# BlueBox – The Black Box for Computers™
+# BlueBox – IT Black Box by Ghass  
+**The aircraft black box principle, finally implemented in information technology**
 
-**Invented and first released by Ghass on November 30, 2025**
+BlueBox is an always-on diagnostic logger for Windows PCs. Inspired by aviation's rugged flight data recorders, it runs silently on every startup, capturing BSODs, kernel faults, and unexpected shutdowns. As a computer lab manager, install it post-repair: If issues recur, get emailed proof before the client returns.
 
-> “Because the crash is too late to start recording.”
+![Blue-Box](Blue-Box.png)  
+*(Logo: Blue Box – Entering IT History)*
 
-BlueBox is the world’s first always-on forensic recorder that continuously keeps the last 30–60 minutes of system activity and automatically freezes everything the moment a BSOD, freeze, or unexpected reboot occurs.
+## Why BlueBox?
+- **Aviation Roots:** Like a black box survives crashes to log "flight history," BlueBox preserves system events for forensic analysis. No more "it worked in the lab!" surprises.
+- **For Lab Workflows:** Deploy on repaired devices. It auto-logs to `%APPDATA%\BlueBox\` and emails alerts. V1 is **free forever**—develop V2 collaboratively.
+- **Ethical & Lightweight:** Logs only system crashes (no personal data). <1% CPU, uninstalls cleanly.
 
-Aviation has black boxes.  
-Now your computer has a **Blue Box**.
+## Features (Version 1.0 – Free & Open Source)
+- **Boot-Time Monitoring:** Scans Windows Event Logs (IDs 1001, 6008, 41) for crashes in the last 24h.
+- **Tamper-Resistant Logs:** Timestamped .txt files with bugcheck codes, faulting modules, and device ID.
+- **Email Alerts:** Optional SMTP notifications on detection (e.g., Gmail setup).
+- **Easy Deploy:** One-command install as Scheduled Task (runs as SYSTEM).
+- **User-Friendly:** Creates desktop uninstall shortcut. No GUI bloat.
 
-## Features (v0.1 – First Flight)
-- 30-minute circular buffer (events, processes, network, screenshots every 30 s)
-- Automatic crash detection (Kernel Power Event 41 + dirty reboot)
-- One-click incident package on the desktop after a crash
-- 100 % PowerShell – zero dependencies
+## Quick Start (Test on Your Lab PC)
+1. **Download:** Clone this repo or grab [BlueBox.ps1](BlueBox.ps1).
+2. **Run as Admin (PowerShell):**
+   ```powershell
+   # Install (sets up startup task)
+   & ".\BlueBox.ps1" -Install
 
-## Quick Start
-1. Run `BlueBox-Recorder.ps1` as Administrator (keeps recording forever)
-2. Run `BlueBox-CrashGuard.ps1` as Administrator (detects crashes)
+   # Test logging (simulates a crash entry)
+   & ".\BlueBox.ps1" -TestCrash
 
-## Author & Inventor
-**Ghass** – original idea and first implementation, November 30, 2025  
-Helped bring it to life in real-time by Grok 4 (xAI)
-
-## License
-MIT © 2025 Ghass – You are free to use, modify, and distribute.
+   # Check logs
+   notepad "%APPDATA%\BlueBox\bluebox_log_$(Get-Date -Format 'yyyy-MM-dd').txt"
