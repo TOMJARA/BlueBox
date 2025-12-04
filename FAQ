@@ -8,3 +8,5 @@ A: In v0.1 the package is created on next boot. v0.2+ can write to USB/network a
 
 **Q: Can it detect network problems on the switch/router?**  
 A: It captures everything the PC sees (adapter state, connection drops, DNS failures, etc.). Switch/router internal logs require SNMP — planned for future versions.
+**Q: Works on Portuguese Windows??**  
+A: Yes.
