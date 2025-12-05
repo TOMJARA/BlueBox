@@ -1,4 +1,4 @@
-# BlueBox.ps1 - IT Black Box Logger by Ghass
+# BlueBox.ps1 - IT Black Box Logger by Ghass.Ka7
 # Inspired by aircraft black boxes: Logs system crashes on every startup for diagnostics.
 # Version 1.0 - Free and Open Source (MIT License)
 # Runs silently, emails alerts on crashes. Install on repaired devices.
