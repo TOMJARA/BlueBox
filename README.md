@@ -67,4 +67,10 @@ if ($Install) {
 }
 
 # Future V2 Stub: Add PDF reports, cloud sync, etc.
+## Pasta /legacy
+Arquivos de simulação antiga (testes de BSOD de Dec 2025) – ignore para instalação real. Use apenas BlueBox.ps1 no root.
+
+## Notas Importantes
+- BlueBox.ps1: Verifique sintaxe antes de usar (possíveis erros de chaves em funções).
+- Ícone Customizado: Para bandeja, baixe de /legacy/7.pig se aplicável.
 # For now, V1 is free and ready!
