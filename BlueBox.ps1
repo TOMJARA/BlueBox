@@ -1,80 +1,47 @@
-<# 
-    BlueBox.ps1 – V1.3 FINAL (05/12/2025)
-    O verdadeiro "caixa-preta" para computadores brasileiros
-    by TOMJARA / Ghass – Laboratórios & Assistência Técnica
-    MIT License – grátis para sempre
-#>
-
+@'
+<# BlueBox.ps1 – V1.6 OFICIAL – 09/12/2025 – Funciona em PowerShell 5 e 7 #>
 param([switch]$Install,[switch]$Uninstall,[switch]$TestCrash)
+
+$EmailPara = "seuemail@lab.com.br"          # ← SEU E-MAIL
+$EmailDe   = "bluebox@lab.com.br"
+$SMTPServer= "smtp.gmail.com"
+$SMTPPorta = 587
+$SMTPUsuario= "bluebox@lab.com.br"
+$SMTPsenha = "SUA_SENHA_DE_APP"
 
 $LogPath = "$env:APPDATA\BlueBox"
 $LogFile = "$LogPath\bluebox_log_$(Get-Date -Format 'yyyy-MM-dd').txt"
-
-# Cria pasta de logs
 if (!(Test-Path $LogPath)) { New-Item -Path $LogPath -ItemType Directory -Force | Out-Null }
 
-function Log-Entry ($Texto) {
-    $linha = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $Texto | PC: $env:COMPUTERNAME | User: $env:USERNAME"
-    Add-Content -Path $LogFile -Value $linha -Encoding UTF8
-}
+function Log-Entry($t){ Add-Content -Path $LogFile -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $t | $env:COMPUTERNAME" -Encoding UTF8 }
+function Send-Email($a,$c){ if($EmailPara -notlike "seuemail@*"){ try{ $s=ConvertTo-SecureString $SMTPsenha -AsPlainText -Force; $cr=New-Object System.Management.Automation.PSCredential($SMTPUsuario,$s); Send-MailMessage -From $EmailDe -To $EmailPara -Subject $a -Body $c -SmtpServer $SMTPServer -Port $SMTPPorta -UseSsl -Credential $cr -Encoding UTF8; Log-Entry "Email enviado" } catch { Log-Entry "Email falhou: $_" }}}
 
-# ==================== INSTALAÇÃO ====================
-if ($Install) {
-    $TaskName = "BlueBox-IT-Logger"
-    $Action   = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-WindowStyle Hidden -File `"$PSScriptRoot\BlueBox.ps1`""
-    $Trigger  = New-ScheduledTaskTrigger -AtStartup -Delay 00:00:30
-    $Principal= New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
-    Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Principal $Principal -Force | Out-Null
-
-    Log-Entry "BlueBox V1.3 instalado com sucesso"
-
+if($Install){
+    Register-ScheduledTask -TaskName "BlueBox-IT-Logger" -Action (New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-WindowStyle Hidden -File `"$PSScriptRoot\BlueBox.ps1`"") -Trigger (New-ScheduledTaskTrigger -AtStartup) -Principal (New-ScheduledTaskPrincipal -UserId SYSTEM -LogonType ServiceAccount -RunLevel Highest) -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries) -Force | Out-Null
+    Log-Entry "BlueBox V1.6 instalado"
     Add-Type -AssemblyName System.Windows.Forms
-    $global:Notify = New-Object System.Windows.Forms.NotifyIcon
-    # Usa o ícone do PowerShell (ou troque por seu .ico no futuro)
-    $global:Notify.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon("$PSHome\powershell.exe")
-    $global:Notify.Visible = $true
-    $global:Notify.BalloonTipIcon  = "Info"
-    $global:Notify.BalloonTipTitle = "Assistência Técnica"
-    BlueBox"
-    $global:Notify.BalloonTipText  = "Diagnóstico ativo – estamos cuidando do seu PC"
-    $global:Notify.ShowBalloonTip(10000)
-
-    # Menu com botão direito
-    $menu = New-Object System.Windows.Forms.ContextMenuStrip
-    $menu.Items.Add("BlueBox V1.3 – ativo", $null, {}) | Out-Null
-    $menu.Items.Add("-") | Out-Null
-    $menu.Items.Add("Desinstalar BlueBox", $null, { & "$PSScriptRoot\BlueBox.ps1" -Uninstall }) | Out-Null
-    $global:Notify.ContextMenuStrip = $menu
-
-    # Mantém vivo em segundo plano
+    $n=New-Object System.Windows.Forms.NotifyIcon
+    $n.Icon=[System.Drawing.Icon]::ExtractAssociatedIcon("$PSHome\powershell.exe")
+    $n.Visible=$true;$n.ShowBalloonTip(8000,"Assistência Técnica","BlueBox ativo",0)
+    ($m=New-Object System.Windows.Forms.ContextMenuStrip).Items.Add("Desinstalar BlueBox",{& "$PSScriptRoot\BlueBox.ps1" -Uninstall})|Out-Null
+    $n.ContextMenuStrip=$m
     [System.Windows.Forms.Application]::Run((New-Object System.Windows.Forms.Form -Property @{WindowState='Minimized';ShowInTaskbar=$false}))
 }
-
-# ==================== DESINSTALAÇÃO ====================
-elseif ($Uninstall) {
-    Unregister-ScheduledTask -TaskName "BlueBox-IT-Logger" -Confirm:$false -ErrorAction SilentlyContinue
+elseif($Uninstall){
+    Unregister-ScheduledTask "BlueBox-IT-Logger" -Confirm:$false -ErrorAction SilentlyContinue
     Remove-Item "$env:APPDATA\BlueBox" -Recurse -Force -ErrorAction SilentlyContinue
-    if ($global:Notify) { $global:Notify.Dispose() }
-    [System.Windows.Forms.MessageBox]::Show("BlueBox foi removido com sucesso!`nObrigado por usar nosso diagnóstico.", "BlueBox", 0, 64) | Out-Null
+    Add-Type -AssemblyName System.Windows.Forms 2>$null
+    [System.Windows.Forms.MessageBox]::Show("BlueBox removido!","BlueBox",0,64)|Out-Null
     exit
 }
-
-# ==================== TESTE RÁPIDO ====================
-elseif ($TestCrash) {
-    Log-Entry "TESTE MANUAL: BlueBox funcionando corretamente"
-    [System.Windows.Forms.MessageBox]::Show("Teste registrado com sucesso!`nLog salvo em:`n$LogFile","BlueBox – Teste OK",0,64) | Out-Null
+elseif($TestCrash){
+    Log-Entry "TESTE MANUAL"
+    Send-Email "Teste BlueBox – $env:COMPUTERNAME" "Funcionou! $(Get-Date)"
+    Log-Entry "Teste concluído"
 }
-
-# ==================== EXECUÇÃO NORMAL (todo boot) ====================
-else {
-    $Eventos = Get-WinEvent -FilterHashtable @{LogName='System'; ID=41,6008,1001; StartTime=(Get-Date).AddHours(-24)} -ErrorAction SilentlyContinue |
-               Where-Object { $_.Message -match "bugcheck|desligamento inesperado|rebooted from a bugcheck" }
-
-    if ($Eventos) {
-        foreach ($e in $Eventos) {
-            Log-Entry "CRASH DETECTADO → ID:$($e.Id) → $($e.Message.Split("`n")[0])"
-        }
-    } else {
-        Log-Entry "Sistema estável – nenhum crash nas últimas 24h"
-    }
+else{
+    $ev=Get-WinEvent -FilterHashtable @{LogName='System';ID=41,6008,1001;StartTime=(Get-Date).AddHours(-48)} -ErrorAction SilentlyContinue | ? {$_.Message -match "bugcheck|rebooted"}
+    if($ev){ foreach($e in $ev){ Log-Entry "CRASH ID:$($e.Id) $($e.Message.Split("`n")[0])" }; Send-Email "ALERTA BlueBox – $env:COMPUTERNAME" "Cliente teve tela azul!`n$($ev|Select -First 5|Out-String)" } 
+    else { Log-Entry "Sistema estável" }
 }
+'@ | Set-Content "$env:USERPROFILE\Desktop\BlueBox.ps1" -Encoding UTF8
